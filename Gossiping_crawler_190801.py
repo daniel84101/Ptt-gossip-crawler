@@ -1,8 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
+# This script is to crawl information from the web version of PTT forum, https://www.ptt.cc/bbs/index.html. With a slight change of the code, the target
+# could be changed from Gossiping to other billboard. 
 
-# In[1]:
-
+# The web version of PTT is subject to auto-deletion. Thus, the page numbers as well as the page addresses are not available now. Modification is needed
+# for the page information part.
 
 from bs4 import BeautifulSoup
 import requests
@@ -13,14 +13,13 @@ import http.cookiejar, urllib.request
 import copy
 import sys
 
-
-# In[12]:
-
-
+# defind the get contents function, including requesting the page source, finding correct classes, and stripping redundent informaition. Finally store the
+# clean form of data into corresponding files
 def get_contents(rurl):
     for line in co.split(';'):
         name,value=line.strip().split('=',1)
         cookies[name]=value
+    # as PTT requires user to be 18 years old or above, cookies were needed to circumvent the age check
     r = requests.get(rurl,cookies=cookies)
     soup = BeautifulSoup(r.text,'lxml')
     a = list(soup.find_all('span', class_ = 'article-meta-value'))
@@ -75,19 +74,14 @@ def get_contents(rurl):
                         writer.writerow(temp)
 
 
-# In[3]:
-
-
 co = '__cfduid=db07d2e21acbb3699967611a2f63348831543802350; _ga=GA1.2.279296032.1543802352; over18=1; _gid=GA1.2.1440098831.1564452876; _gat=1'
 cookies={}
 for line in co.split(';'):
     name,value=line.strip().split('=',1)
     cookies[name]=value
-    
 
-
-# In[14]:
-
+# I set the page number 932~12501 to capture all the posts two months before and after the date PTT stoped accepting non-NTU registration. The exact page
+# number would vary according to the date the code is run. This range for page numbers work only on Aug 1st 2019.
 
 for i in range(932,12501):
     print(i)
@@ -106,38 +100,3 @@ for i in range(932,12501):
         print(i)
         get_contents(i)
     time.sleep(2)
-
-
-# In[15]:
-
-
-for i in range(4549,12501):
-    print(i)
-    page_num = str(i)
-    url = "https://www.ptt.cc/bbs/Gossiping/index" + page_num + ".html"
-    r = requests.get(url,cookies=cookies)
-    soup = BeautifulSoup(r.text,'lxml')
-    a = list(soup.find_all('div', class_ = 'title'))
-    aa = []
-    for s in a:
-        if s.find('a') == None:
-            continue
-        else:
-            aa.extend(['https://www.ptt.cc'+s.find('a')['href']])
-    for i in aa:
-        print(i)
-        get_contents(i)
-    time.sleep(2)
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
